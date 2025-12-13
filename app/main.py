@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 
-@app.route("/gemini/jobs", methods=["GET"])
+@app.route("/api/jobs", methods=["GET"])
 def list_jobs():
     try:
         data = kube_request("GET", settings.JOB_API_PATH)
@@ -20,7 +20,7 @@ def list_jobs():
 
         for item in data.get("items", []):
             name = item.get("metadata", {}).get("name", "")
-            if not name.startswith("gemini-job-"):
+            if not name.startswith("api-job-"):
                 continue
 
             status = "Running"
@@ -32,7 +32,7 @@ def list_jobs():
 
             jobs.append({
                 "job_name": name,
-                "job_id": name.replace("gemini-job-", ""),
+                "job_id": name.replace("api-job-", ""),
                 "status": status,
                 "created": item.get("metadata", {}).get("creationTimestamp")
             })
@@ -44,7 +44,7 @@ def list_jobs():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-@app.route("/gemini/create", methods=["POST"])
+@app.route("/api/create", methods=["POST"])
 def create_job():
     job_type = request.args.get("type", "api-triggered")
 

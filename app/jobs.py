@@ -11,7 +11,7 @@ def build_job_manifest(job_type: str):
     suffix = str(uuid.uuid4())[:8]
 
     job_id = f"{timestamp}-{suffix}"
-    job_name = f"gemini-job-{job_id}"
+    job_name = f"api-job-{job_id}"
 
     logger.info("Building job %s (type=%s)", job_name, job_type)
 
@@ -22,7 +22,7 @@ def build_job_manifest(job_type: str):
             "name": job_name,
             "namespace": settings.JOB_NAMESPACE,
             "labels": {
-                "app": "gemini-job",
+                "app": "api-job",
                 "environment": settings.ENVIRONMENT,
                 "job-type": job_type
             }
