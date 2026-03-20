@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Understanding AI — A Beginner's Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #f7f6f2;
+      --surface: #ffffff;
+      --border: #e4e0d8;
+      --text-primary: #1a1814;
+      --text-secondary: #5c574e;
+      --text-muted: #9c9690;
+      --accent: #c84b2f;
+      --accent-soft: #f5ede9;
+      --accent2: #2f6ec8;
+      --accent2-soft: #e9eff5;
+      --green: #2a7a4b;
+      --green-soft: #e8f3ed;
+      --gold: #b07d2a;
+      --gold-soft: #f5eed8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      font-family: 'DM Sans', sans-serif;
+      color: var(--text-primary);
+      line-height: 1.7;
+    }
+
+    /* ── Top bar (Confluence-like) ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 40px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar span { color: var(--text-secondary); }
+    .topbar .sep { color: var(--border); }
+    .topbar .current { color: var(--text-primary); font-weight: 500; }
+    .topbar-space { font-weight: 600; color: var(--accent); }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      gap: 48px;
+      align-items: start;
+    }
+
+    /* ── TOC Sidebar ── */
+    .toc {
+      position: sticky;
+      top: 72px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 13px;
+    }
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .toc a {
+      display: block;
+      color: var(--text-secondary);
+      text-decoration: none;
+      padding: 5px 0 5px 10px;
+      border-left: 2px solid transparent;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .toc a:hover {
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+    .toc a.sub { padding-left: 22px; font-size: 12px; }
+
+    /* ── Main Content ── */
+    .content { min-width: 0; }
+
+    /* ── Page Header ── */
+    .page-header {
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .page-title {
+      font-family: 'Lora', serif;
+      font-size: 36px;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+    .page-subtitle {
+      font-size: 17px;
+      color: var(--text-secondary);
+      font-weight: 300;
+      margin-bottom: 20px;
+    }
+    .page-meta {
+      display: flex;
+      gap: 20px;
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+    .page-meta span { display: flex; align-items: center; gap: 5px; }
+
+    /* ── Callout boxes ── */
+    .callout {
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin: 24px 0;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+    .callout-text { font-size: 14px; line-height: 1.6; }
+    .callout.info { background: var(--accent2-soft); }
+    .callout.info .callout-title { color: var(--accent2); }
+    .callout.tip { background: var(--green-soft); }
+    .callout.tip .callout-title { color: var(--green); }
+    .callout.note { background: var(--gold-soft); }
+    .callout.note .callout-title { color: var(--gold); }
+
+    /* ── Section headings ── */
+    .section { margin-bottom: 48px; }
+    .section-anchor { display: block; position: relative; top: -80px; visibility: hidden; }
+
+    h2 {
+      font-family: 'Lora', serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--border);
+    }
+    h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 24px 0 10px;
+    }
+    p { font-size: 15px; color: var(--text-secondary); margin-bottom: 14px; }
+    p strong { color: var(--text-primary); font-weight: 600; }
+
+    /* ── Analogy card ── */
+    .analogy {
+      background: linear-gradient(135deg, #fdf8f0, #fef3e8);
+      border: 1px solid #e8d8b8;
+      border-left: 4px solid var(--gold);
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin: 20px 0;
+    }
+    .analogy-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .analogy p { font-size: 14.5px; color: #5a4a2a; margin-bottom: 0; font-style: italic; }
+    .analogy p strong { color: #3a2a0a; }
+
+    /* ── Timeline ── */
+    .timeline { margin: 24px 0; }
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 44px;
+      top: 28px;
+      bottom: -24px;
+      width: 2px;
+      background: var(--border);
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-year {
+      font-weight: 700;
+      font-size: 13px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 20px;
+      padding: 4px 10px;
+      text-align: center;
+      height: fit-content;
+      margin-top: 2px;
+    }
+    .timeline-content h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+    .timeline-content p {
+      font-size: 13.5px;
+      margin-bottom: 0;
+    }
+
+    /* ── Use-case grid ── */
+    .usecase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 20px 0;
+    }
+    .usecase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      transition: box-shadow 0.2s;
+    }
+    .usecase-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.07); }
+    .usecase-icon { font-size: 26px; margin-bottom: 10px; }
+    .usecase-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; color: var(--text-primary); }
+    .usecase-desc { font-size: 13.5px; color: var(--text-secondary); margin-bottom: 0; }
+
+    /* ── Steps (getting started) ── */
+    .steps { counter-reset: step; margin: 20px 0; }
+    .step {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+      align-items: flex-start;
+    }
+    .step-num {
+      counter-increment: step;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      font-size: 13px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-body h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .step-body p { font-size: 13.5px; margin-bottom: 0; }
+
+    /* ── Tool chips ── */
+    .tool-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+    .tool-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .tool-chip span { font-size: 16px; }
+
+    /* ── Divider ── */
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+    @media (max-width: 700px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+      .usecase-grid { grid-template-columns: 1fr; }
+      .page-title { font-size: 26px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Confluence-style top bar -->
+<div class="topbar">
+  <span class="topbar-space">📚 Knowledge Base</span>
+  <span class="sep">/</span>
+  <span>Technology</span>
+  <span class="sep">/</span>
+  <span>Artificial Intelligence</span>
+  <span class="sep">/</span>
+  <span class="current">AI — A Beginner's Guide</span>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar TOC -->
+  <nav class="toc">
+    <div class="toc-title">On this page</div>
+    <a href="#what-is-ai">What is AI?</a>
+    <a href="#history">How did it evolve?</a>
+    <a href="#history" class="sub">Key Milestones</a>
+    <a href="#how-it-works">How does it work?</a>
+    <a href="#how-it-works" class="sub">From Rules → Learning</a>
+    <a href="#rag">RAG — AI with Memory</a>
+    <a href="#agents">Agents — AI that Acts</a>
+    <a href="#mcp">MCP — Universal Plug</a>
+    <a href="#usecases">What can AI do?</a>
+    <a href="#start">Where do I start?</a>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-label">🌱 Beginner Friendly</div>
+      <h1 class="page-title">Artificial Intelligence —<br/>A Guide for the Curious Mind</h1>
+      <p class="page-subtitle">No jargon. No coding. Just real-world analogies to help you understand AI from scratch — and start using it today.</p>
+      <div class="page-meta">
+        <span>✍️ Aman Shrivastav</span>
+        <span>📅 March 2026</span>
+        <span>⏱️ 10 min read</span>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Who is this for?</div>
+        <div class="callout-text">This page is written for anyone curious about AI — even if you've never written a line of code or worked in tech. If you can use a smartphone, you already have everything it takes to start exploring AI.</div>
+      </div>
+    </div>
+
+    <!-- Section 1 -->
+    <div class="section">
+      <span class="section-anchor" id="what-is-ai"></span>
+      <h2>🤔 What is Artificial Intelligence?</h2>
+      <p>Artificial Intelligence, or AI, simply means <strong>teaching a machine to think and make decisions</strong> — the way a human would. Not perfectly, not emotionally, but intelligently enough to solve problems, answer questions, and get things done.</p>
+
+      <div class="analogy">
+        <div class="analogy-label">🧩 Real-life analogy</div>
+        <p>Think of a <strong>new employee joining your office</strong>. On Day 1, they know nothing about your business. But over time, you train them — you show them examples, correct their mistakes, and reward good work. Eventually, they can handle tasks on their own. <strong>AI is that employee — except instead of months, it learns in hours, from millions of examples.</strong></p>
+      </div>
+
+      <p>AI is not a single technology — it's an umbrella term. Under it live things like Machine Learning, Deep Learning, Large Language Models (like ChatGPT), and more. Don't worry about these terms for now — we'll get there naturally.</p>
+    </div>
+
+    <!-- Section 2 -->
+    <div class="section">
+      <span class="section-anchor" id="history"></span>
+      <h2>📅 How did AI come into existence?</h2>
+      <p>AI didn't appear overnight. It's the result of decades of curiosity, failure, and breakthroughs — much like how your city's roads evolved from mud tracks to highways over generations.</p>
+
+      <div class="timeline">
+
+        <div class="timeline-item">
+          <div class="timeline-year">1950s</div>
+          <div class="timeline-content">
+            <h4>The Big Question 🧠</h4>
+            <p>Scientist Alan Turing asked: <em>"Can machines think?"</em> He proposed the <strong>Turing Test</strong> — if a machine can have a conversation indistinguishable from a human, it's intelligent. This was the spark that started everything.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">1980s</div>
+          <div class="timeline-content">
+            <h4>Rule-Based Systems 📋</h4>
+            <p>Early AI was like a <strong>very strict recipe book</strong>. Programmers wrote thousands of rules: "IF patient has fever AND cough THEN suggest flu." It worked in narrow cases but broke the moment something unexpected happened.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2000s</div>
+          <div class="timeline-content">
+            <h4>Machine Learning 📊</h4>
+            <p>Instead of writing rules, we started <strong>feeding data and letting the machine find its own patterns</strong>. Like teaching a child not by listing every rule, but by showing them 10,000 pictures of cats until they just know what a cat looks like.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2012</div>
+          <div class="timeline-content">
+            <h4>Deep Learning Breakthrough 🚀</h4>
+            <p>A new approach called <strong>Deep Learning</strong> — inspired by how the human brain works with layers of neurons — suddenly made AI dramatically smarter at recognising images, speech, and language.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">2022</div>
+          <div class="timeline-content">
+            <h4>ChatGPT Changes Everything 🌍</h4>
+            <p>OpenAI released ChatGPT — an AI that could hold a natural conversation, write essays, explain code, and answer questions. For the first time, <strong>AI felt like talking to a knowledgeable friend</strong>. The world took notice overnight.</p>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="timeline-year">Today</div>
+          <div class="timeline-content">
+            <h4>AI is Everywhere 🌐</h4>
+            <p>AI is now embedded in your phone's autocorrect, your bank's fraud detection, Netflix recommendations, Google Maps, and medical diagnosis tools. It has moved from research labs into everyday life.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section 3 -->
+    <div class="section">
+      <span class="section-anchor" id="how-it-works"></span>
+      <h2>⚙️ How does AI actually learn?</h2>
+      <p>At its core, AI learns the same way humans do — through <strong>exposure and feedback</strong>. The more examples it sees, and the more corrections it receives, the better it gets.</p>
+
+      <div class="analogy">
+        <div class="analogy-label">🧩 Real-life analogy</div>
+        <p>Remember learning to ride a bike? Nobody gave you a 50-page manual. You <strong>tried, fell, adjusted, and tried again</strong>. Your brain learned through repetition and feedback. AI does the same thing — just with data instead of scraped knees. You show it millions of examples, tell it when it's wrong, and it adjusts its internal settings until it gets better.</p>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- Section 4 - RAG -->
+    <div class="section">
+      <span class="section-anchor" id="rag"></span>
+      <h2>📚 RAG — Giving AI a Reference Book</h2>
+      <p>Out-of-the-box AI only knows what it was trained on. What if you want it to answer questions about <em>your</em> company's documents, or last week's news? That's where <strong>RAG</strong> (Retrieval-Augmented Generation) comes in.</p>
+
+      <div class="analogy">
+        <div class="analogy-label">🧩 Real-life analogy</div>
+        <p>Imagine a <strong>smart student who has access to your company's policy manual</strong>. You ask them a question. Instead of guessing, they quickly flip through the manual, find the relevant page, and give you a precise answer based on what's written. <strong>RAG is that student — the AI searches your documents first, then responds.</strong> It reads only, it doesn't change anything.</p>
+      </div>
+
+      <div class="callout note">
+        <div class="callout-icon">📌</div>
+        <div class="callout-body">
+          <div class="callout-title">Key point</div>
+          <div class="callout-text">RAG-based AI has <strong>read-only intelligence</strong>. It can tell you what to do, find answers, summarise documents — but it cannot take actions on its own.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5 - Agents -->
+    <div class="section">
+      <span class="section-anchor" id="agents"></span>
+      <h2>🤖 AI Agents — From Advisor to Doer</h2>
+      <p>RAG was a great advisor. But what if you wanted AI to actually <em>do the work</em> — not just tell you what needs to be done? That's where <strong>AI Agents</strong> came in.</p>
+
+      <div class="analogy">
+        <div class="analogy-label">🧩 Real-life analogy</div>
+        <p>The difference between RAG and an Agent is like the difference between a <strong>consultant and an employee</strong>. The consultant tells you: <em>"You should update that database entry."</em> The employee actually opens the system, makes the change, and confirms it's done. <strong>Agents are AI that can take real actions</strong> — send emails, create tickets, update databases, book meetings.</p>
+      </div>
+
+      <p>People started building individual agents for every application — one agent connected to Gmail, another to Jira, another to databases. Each one was built separately, in its own way. There was no common standard — until MCP arrived.</p>
+    </div>
+
+    <!-- Section 6 - MCP -->
+    <div class="section">
+      <span class="section-anchor" id="mcp"></span>
+      <h2>🔌 MCP — The Universal Plug</h2>
+      <p>With hundreds of AI agents being built for different apps, there was a problem: every agent used a different "language" to connect. It was messy, repetitive, and hard to scale. So Anthropic (the company behind Claude AI) created <strong>MCP — Model Context Protocol</strong> — a universal standard for AI to connect to any application.</p>
+
+      <div class="analogy">
+        <div class="analogy-label">🧩 Real-life analogy</div>
+        <p>Picture your <strong>mobile phone charger</strong>. There are three parts:</p>
+        <p>🔌 The <strong>wall socket</strong> = the Application (Gmail, Jira, your database)<br/>
+        🟫 The <strong>charger block</strong> = MCP (the universal standard Anthropic built)<br/>
+        🔵 The <strong>cable</strong> = You / the AI (Claude)</p>
+        <p><strong>You can't plug a cable directly into a wall socket</strong> — you need the charger block in between. MCP is that charger block. Now any AI can connect to any application through one standard protocol, without building a custom connector every time.</p>
+      </div>
+
+      <div class="callout tip">
+        <div class="callout-icon">✅</div>
+        <div class="callout-body">
+          <div class="callout-title">Why does this matter for you?</div>
+          <div class="callout-text">Because of MCP, AI tools today can connect to your calendar, email, spreadsheets, and work tools — all through one common standard. This is why modern AI assistants feel so powerful and integrated.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- Section 7 - Use Cases -->
+    <div class="section">
+      <span class="section-anchor" id="usecases"></span>
+      <h2>🌟 What can AI actually do today?</h2>
+      <p>AI is no longer just a research concept. Here are real things people are doing with it right now — many of which require zero coding knowledge.</p>
+
+      <div class="usecase-grid">
+
+        <div class="usecase-card">
+          <div class="usecase-icon">✍️</div>
+          <div class="usecase-title">Writing & Communication</div>
+          <p class="usecase-desc">Draft emails, summarise long documents, write reports, translate languages, and proofread text — in seconds.</p>
+        </div>
+
+        <div class="usecase-card">
+          <div class="usecase-icon">🎨</div>
+          <div class="usecase-title">Image & Design Creation</div>
+          <p class="usecase-desc">Generate images, logos, and visuals from a text description. No design skills needed.</p>
+        </div>
+
+        <div class="usecase-card">
+          <div class="usecase-icon">💬</div>
+          <div class="usecase-title">Personal Assistant</div>
+          <p class="usecase-desc">Schedule meetings, set reminders, answer questions, search the web, and manage your to-do list through conversation.</p>
+        </div>
+
+        <div class="usecase-card">
+          <div class="usecase-icon">📊</div>
+          <div class="usecase-title">Data & Research</div>
+          <p class="usecase-desc">Analyse spreadsheets, summarise research papers, find trends in data — without needing to know Excel formulas.</p>
+        </div>
+
+        <div class="usecase-card">
+          <div class="usecase-icon">🏥</div>
+          <div class="usecase-title">Health & Wellness</div>
+          <p class="usecase-desc">Understand medical reports, get diet suggestions, track symptoms, and find relevant health information quickly.</p>
+        </div>
+
+        <div class="usecase-card">
+          <div class="usecase-icon">🎓</div>
+          <div class="usecase-title">Learning & Education</div>
+          <p class="usecase-desc">Get concepts explained at your level, practise a new language, get instant answers to questions — like a tutor on demand.</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Section 8 - Getting Started -->
+    <div class="section">
+      <span class="section-anchor" id="start"></span>
+      <h2>🚀 Where do I start?</h2>
+      <p>The best way to understand AI is to <strong>just start using it</strong>. You don't need to understand how it works under the hood — just like you don't need to understand how an engine works to drive a car.</p>
+
+      <div class="steps">
+
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Start with a conversation</h4>
+            <p>Open <strong>Claude (claude.ai)</strong> or <strong>ChatGPT (chat.openai.com)</strong> — both are free. Type a question as you'd ask a friend. Ask it to explain something, summarise an article, or help you write an email.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Use it for one daily task</h4>
+            <p>Pick one thing you do every day — reading emails, writing messages, looking up information — and try doing it with AI assistance for a week. You'll quickly see where it saves you time.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Explore AI-powered tools you already use</h4>
+            <p>Many apps you likely already use now have AI built in — Google Docs, Microsoft Word, Gmail, and WhatsApp all have AI features. Look for the ✨ or "Ask AI" button.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Don't be afraid to experiment</h4>
+            <p>AI won't break if you ask a wrong question. There's no right or wrong way to use it. The more you experiment, the more useful it becomes. Think of it as a very patient, knowledgeable friend who is always available.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <h3>Recommended tools to try (all free to start)</h3>
+      <div class="tool-list">
+        <div class="tool-chip"><span>🤖</span> Claude (claude.ai)</div>
+        <div class="tool-chip"><span>💬</span> ChatGPT</div>
+        <div class="tool-chip"><span>🔍</span> Google Gemini</div>
+        <div class="tool-chip"><span>🖼️</span> Adobe Firefly (image gen)</div>
+        <div class="tool-chip"><span>📝</span> Notion AI</div>
+        <div class="tool-chip"><span>📧</span> Gmail Smart Compose</div>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <div class="callout-title">Final thought</div>
+        <div class="callout-text">AI is not here to replace you. It's here to <strong>amplify what you're already good at</strong>. The people who will benefit most from AI are not the ones who understand it technically — but the ones who are curious enough to start using it. You already are.</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>
+
+
