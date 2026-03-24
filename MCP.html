@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Getting Started with MCP</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #1F4E79;
+    --blue:   #2E75B6;
+    --purple: #6C3483;
+    --green:  #1E8449;
+    --orange: #D4851A;
+    --red:    #C0392B;
+    --bg:     #F4F7FB;
+    --surface:#FFFFFF;
+    --border: #DDE4EE;
+    --text:   #1A2332;
+    --muted:  #5A6A7E;
+    --light:  #EBF1F8;
+    --sans:   'IBM Plex Sans', sans-serif;
+    --mono:   'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); font-size: 15px; line-height: 1.75; }
+
+  /* HEADER */
+  .page-header {
+    background: var(--navy);
+    padding: 52px 64px 44px;
+    position: relative; overflow: hidden;
+  }
+  .page-header::before {
+    content: ''; position: absolute; top: -80px; right: -80px;
+    width: 340px; height: 340px; border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .header-eyebrow {
+    font-family: var(--mono); font-size: 11px;
+    color: rgba(255,255,255,0.45); letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 14px;
+  }
+  .header-title { font-size: 52px; font-weight: 700; color: #fff; letter-spacing: -1.5px; line-height: 1.1; }
+  .header-title span { color: #7ABFEF; }
+  .header-sub { margin-top: 10px; font-size: 17px; font-weight: 300; color: rgba(255,255,255,0.6); }
+  .header-meta {
+    margin-top: 28px; display: flex; gap: 24px;
+    font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,0.35);
+  }
+
+  /* NAV / TOC */
+  .toc {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 64px; display: flex; gap: 32px; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .toc a {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    text-decoration: none; letter-spacing: 1px; text-transform: uppercase;
+    transition: color .2s;
+  }
+  .toc a:hover { color: var(--blue); }
+
+  /* LAYOUT */
+  .page-body { max-width: 1060px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* SECTIONS */
+  .section { margin-bottom: 56px; }
+  .section-header {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: 24px; padding-bottom: 14px;
+    border-bottom: 2px solid var(--light);
+  }
+  .section-num {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--blue); background: var(--light);
+    padding: 4px 10px; border-radius: 4px; letter-spacing: 1px;
+  }
+  .section-title { font-size: 22px; font-weight: 700; color: var(--navy); }
+
+  h3 { font-size: 16px; font-weight: 600; color: var(--navy); margin: 28px 0 10px; }
+  p  { margin-bottom: 14px; color: var(--muted); }
+  p strong { color: var(--text); }
+
+  /* ANALOGY CALLOUT */
+  .analogy {
+    background: linear-gradient(135deg, #FFF8EC 0%, #FEF3DC 100%);
+    border-left: 4px solid var(--orange);
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px; margin: 20px 0;
+  }
+  .analogy-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    color: var(--orange); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .analogy p { color: #7A5A20; margin: 0; }
+
+  /* INFO CALLOUT */
+  .callout {
+    background: var(--light); border-left: 4px solid var(--blue);
+    border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 20px 0;
+  }
+  .callout-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    color: var(--blue); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .callout p { color: var(--muted); margin: 0; }
+
+  /* WARNING */
+  .warning {
+    background: #FFF5F5; border-left: 4px solid var(--red);
+    border-radius: 0 8px 8px 0; padding: 16px 20px; margin: 20px 0;
+  }
+  .warning-label {
+    font-family: var(--mono); font-size: 10px; font-weight: 600;
+    color: var(--red); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .warning p { color: #7A2020; margin: 0; }
+
+  /* TABLES */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  thead tr { background: var(--navy); }
+  thead th { padding: 12px 16px; color: #fff; text-align: left; font-weight: 600; font-size: 13px; }
+  tbody tr:nth-child(even) { background: var(--light); }
+  tbody tr:nth-child(odd)  { background: var(--surface); }
+  tbody td { padding: 11px 16px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  tbody td strong { color: var(--text); }
+
+  /* BULLET LIST */
+  ul.styled { list-style: none; padding: 0; margin: 14px 0; }
+  ul.styled li {
+    padding: 8px 0 8px 28px; position: relative;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+  }
+  ul.styled li:last-child { border-bottom: none; }
+  ul.styled li::before {
+    content: '->'; position: absolute; left: 0;
+    color: var(--blue); font-weight: 700; font-family: var(--mono); font-size: 12px;
+  }
+  ul.styled li strong { color: var(--text); }
+
+  /* CHEATSHEET GRID */
+  .cheat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+  .cheat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px;
+    border-top: 3px solid var(--blue);
+  }
+  .cheat-term { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 4px; }
+  .cheat-def  { font-size: 13px; color: var(--muted); }
+
+  /* ── FLOWCHART ─────────────────────────────── */
+  .flowchart-wrap {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 40px 32px; margin: 28px 0;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .flow-row { display: flex; align-items: flex-start; justify-content: center; width: 100%; gap: 0; }
+  .flow-col  { display: flex; flex-direction: column; align-items: center; }
+
+  .fnode {
+    border-radius: 10px; padding: 12px 28px;
+    text-align: center; min-width: 200px; max-width: 260px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.10);
+    transition: transform .15s, box-shadow .15s;
+    cursor: default;
+  }
+  .fnode:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.14); }
+  .fnode-label { font-weight: 700; font-size: 14px; }
+  .fnode-sub   { font-size: 11px; opacity: .82; margin-top: 3px; }
+
+  .fnode-navy   { background: var(--navy);   color: #fff; }
+  .fnode-blue   { background: var(--blue);   color: #fff; }
+  .fnode-green  { background: var(--green);  color: #fff; }
+  .fnode-purple { background: var(--purple); color: #fff; }
+  .fnode-dkgreen{ background: #145A32;       color: #fff; }
+
+  /* Diamond */
+  .diamond-wrap { position: relative; width: 200px; height: 80px; margin: 4px 0; }
+  .diamond-shape {
+    position: absolute; top: 50%; left: 50%;
+    width: 140px; height: 140px;
+    transform: translate(-50%,-50%) rotate(45deg) scale(.56);
+    background: var(--orange); border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  }
+  .diamond-text {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 12px; color: #fff; text-align: center; padding: 0 20px;
+    z-index: 1;
+  }
+
+  /* Arrows */
+  .arrow-down { display: flex; flex-direction: column; align-items: center; margin: 2px 0; }
+  .arrow-down .shaft { width: 2px; height: 20px; background: #94a3b8; }
+  .arrow-down .arrowlabel { font-size: 10px; color: #94a3b8; font-style: italic; font-family: var(--mono); }
+  .arrow-down .head {
+    width: 0; height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 9px solid #94a3b8;
+  }
+
+  .branch-divider {
+    width: 1px; background: var(--border);
+    margin: 0 24px; align-self: stretch; min-height: 60px; margin-top: 32px;
+  }
+
+  /* Server types */
+  .server-box {
+    background: var(--purple); border-radius: 10px;
+    padding: 14px 16px; max-width: 260px; width: 100%;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  }
+  .server-box-title { color: #fff; font-weight: 700; font-size: 14px; text-align: center; margin-bottom: 10px; }
+  .server-types { display: flex; gap: 6px; }
+  .stype {
+    flex: 1; border-radius: 6px; padding: 8px 6px; text-align: center;
+    transition: transform .15s;
+  }
+  .stype:hover { transform: translateY(-2px); }
+  .stype-icon  { font-size: 18px; }
+  .stype-name  { font-size: 11px; font-weight: 700; color: #fff; margin-top: 3px; }
+  .stype-desc  { font-size: 10px; color: rgba(255,255,255,.75); margin-top: 2px; }
+
+  .branch-label {
+    font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 14px;
+    margin-top: 28px; padding-top: 18px;
+    border-top: 1px solid var(--border); width: 100%;
+  }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .legend-dot  { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* FOOTER */
+  .page-footer {
+    background: var(--navy); color: rgba(255,255,255,0.4);
+    text-align: center; padding: 24px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1px;
+  }
+
+  @media(max-width:700px){
+    .page-header { padding: 32px 24px; }
+    .toc { padding: 12px 24px; gap: 16px; }
+    .page-body { padding: 32px 16px 60px; }
+    .cheat-grid { grid-template-columns: 1fr; }
+    .header-title { font-size: 36px; }
+    .flow-row { flex-direction: column; align-items: center; }
+    .branch-divider { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="header-eyebrow">Internal Technical Reference</div>
+  <div class="header-title">Getting Started with <span>MCP</span></div>
+  <div class="header-sub">Model Context Protocol — A practical primer for software engineers</div>
+  <div class="header-meta">
+    <span>&#x1F4C5; March 2026</span>
+    <span>&#x1F4D6; ~7 min read</span>
+    <span>&#x1F3F7; AI · Integration · Architecture</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<nav class="toc">
+  <a href="#problem">1. The Problem</a>
+  <a href="#concepts">2. Core Concepts</a>
+  <a href="#flow">3. The Flow</a>
+  <a href="#flowchart">4. Flowchart</a>
+  <a href="#vs-api">5. MCP vs REST</a>
+  <a href="#security">6. Security</a>
+  <a href="#ecosystem">7. Ecosystem</a>
+  <a href="#cheatsheet">8. Cheat Sheet</a>
+</nav>
+
+<div class="page-body">
+
+  <!-- 1. THE PROBLEM -->
+  <div class="section" id="problem">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">The Problem MCP Solves</span>
+    </div>
+    <p>Before MCP, connecting an AI model to external tools was fragmented and one-off. Every combination of AI frontend and tool required its own custom integration — built from scratch, reusable nowhere.</p>
+    <p>This is the <strong>N×M problem</strong>: N tools × M AI frontends = N×M custom integrations.</p>
+
+    <div class="analogy">
+      <div class="analogy-label">&#x1F355; Analogy — The Delivery Bike Problem</div>
+      <p>Imagine every restaurant in the city had to buy and maintain their own fleet of delivery bikes — one per food app (Swiggy, Zomato, Dunzo). That's insane. Instead, Zomato's network works with <em>all</em> restaurants through one standard. MCP is that delivery network for AI tools.</p>
+    </div>
+
+    <p>MCP collapses this to <strong>N + M</strong>. Build a server once, and any MCP-compatible AI can use it — without rewriting the integration for every pairing.</p>
+  </div>
+
+  <!-- 2. CORE CONCEPTS -->
+  <div class="section" id="concepts">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Core Concepts</span>
+    </div>
+
+    <h3>What is MCP?</h3>
+    <p>MCP (Model Context Protocol) is an <strong>open standard</strong> — not a library, not a SaaS product — for how AI models communicate with external tools and data sources. Think of it like REST or GraphQL, but designed specifically for AI agents to consume. It uses <strong>JSON-RPC 2.0</strong> as its wire format — the same standard that powers IDE language intelligence (LSP).</p>
+
+    <div class="analogy">
+      <div class="analogy-label">&#x1F50C; Analogy — USB-C</div>
+      <p>Before USB-C, every device had its own charger. MCP is USB-C for AI tools. It doesn't matter if the laptop is a Dell or a MacBook — one cable works everywhere. Similarly, it doesn't matter if your AI is Claude or GPT — one MCP server works with both.</p>
+    </div>
+
+    <h3>The Three Actors</h3>
+    <table>
+      <thead><tr><th>Component</th><th>Who It Is</th><th>What It Does</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MCP Host</strong></td><td>Claude Desktop, Cursor, your app</td><td>The AI application the user talks to. Contains the LLM and orchestrates everything.</td></tr>
+        <tr><td><strong>MCP Client</strong></td><td>Lives inside the Host</td><td>Manages a 1:1 session with one MCP Server. Handles connections, errors, and timeouts.</td></tr>
+        <tr><td><strong>MCP Server</strong></td><td>Your tool / external service</td><td>Exposes capabilities to the AI. Translates external responses into a format the model understands.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>What an MCP Server Exposes</h3>
+    <ul class="styled">
+      <li><strong>Tools</strong> — Executable actions with side effects (call an API, run a DB query, send an email). The model decides when to invoke these.</li>
+      <li><strong>Resources</strong> — Read-only data retrieval from files or databases. No side effects. Context the model can pull in.</li>
+      <li><strong>Prompts</strong> — Reusable, parameterised templates for structured LLM workflows.</li>
+    </ul>
+
+    <div class="analogy">
+      <div class="analogy-label">&#x1F3E5; Analogy — A Hospital Front Desk</div>
+      <p>The MCP Server is like a hospital receptionist. <em>Tools</em> are things they can <strong>do</strong> (book an appointment, send a referral). <em>Resources</em> are things they can <strong>show</strong> you (test results, medical history). <em>Prompts</em> are the standard scripts they follow for common situations ("first-time patient intake").</p>
+    </div>
+  </div>
+
+  <!-- 3. THE FLOW -->
+  <div class="section" id="flow">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">How It Works — Step by Step</span>
+    </div>
+    <p>Concrete example: you ask an AI — <em>"Find the latest sales report and email it to my manager."</em></p>
+    <table>
+      <thead><tr><th>#</th><th>Step</th><th>Who Acts</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>User sends the request to the AI application.</td><td>User → MCP Host</td></tr>
+        <tr><td>2</td><td>LLM processes the request and determines it needs external tools.</td><td>MCP Host (LLM)</td></tr>
+        <tr><td>3</td><td>MCP Client queries connected servers: "What tools do you expose?"</td><td>MCP Client</td></tr>
+        <tr><td>4</td><td>LLM reads tool descriptions and decides which to call and in what order — <strong>no developer hard-codes this logic</strong>.</td><td>MCP Host (LLM)</td></tr>
+        <tr><td>5</td><td>Tool calls are sent via JSON-RPC 2.0 to the MCP Server, which executes and returns results.</td><td>MCP Server</td></tr>
+        <tr><td>6</td><td>LLM synthesises results and responds to the user naturally.</td><td>MCP Host (LLM)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="callout-label">&#x1F4A1; Key Insight</div>
+      <p>The LLM is the decision-maker in the middle — it reads tool descriptions and figures out the sequence itself. MCP is just the standardised pipe that makes that communication possible.</p>
+    </div>
+
+    <div class="analogy">
+      <div class="analogy-label">&#x1F37D; Analogy — A Restaurant Kitchen</div>
+      <p>The <strong>Host</strong> is the head chef (brain of the operation). The <strong>MCP Client</strong> is the waiter who knows which stations exist. The <strong>MCP Servers</strong> are the individual stations — grill, salad, dessert. The chef doesn't grill the steak himself; he calls the grill station. The waiter ferries orders back and forth. The chef then plates everything into one final dish for the customer.</p>
+    </div>
+  </div>
+
+  <!-- 4. FLOWCHART -->
+  <div class="section" id="flowchart">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">MCP Flow — Visual</span>
+    </div>
+    <p>The diagram shows both paths: when the LLM can answer directly, and when it needs to reach out to MCP Servers.</p>
+
+    <div class="flowchart-wrap">
+
+      <div class="fnode fnode-navy">
+        <div class="fnode-label">&#x1F464; User</div>
+        <div class="fnode-sub">Sends a natural language request</div>
+      </div>
+
+      <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+
+      <div class="fnode fnode-blue">
+        <div class="fnode-label">&#x1F5A5; MCP Host</div>
+        <div class="fnode-sub">LLM receives &amp; processes request</div>
+      </div>
+
+      <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+
+      <div class="diamond-wrap">
+        <div class="diamond-shape"></div>
+        <div class="diamond-text">Can LLM answer alone?</div>
+      </div>
+
+      <div class="flow-row" style="margin-top:8px;">
+
+        <!-- YES -->
+        <div class="flow-col" style="min-width:220px;">
+          <div class="branch-label" style="color:#1E8449;">&#x2705; YES</div>
+          <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+          <div class="fnode fnode-green">
+            <div class="fnode-label">Direct Response</div>
+            <div class="fnode-sub">No tools needed</div>
+          </div>
+          <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+          <div class="fnode fnode-dkgreen">
+            <div class="fnode-label">&#x1F464; User Gets Answer</div>
+          </div>
+        </div>
+
+        <div class="branch-divider"></div>
+
+        <!-- NO -->
+        <div class="flow-col" style="min-width:260px;">
+          <div class="branch-label" style="color:#C0392B;">&#x274C; NO</div>
+          <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+
+          <div class="fnode fnode-blue">
+            <div class="fnode-label">&#x1F50C; MCP Client</div>
+            <div class="fnode-sub">Discovers available tools from servers</div>
+          </div>
+          <div class="arrow-down"><div class="shaft"></div><div class="head"></div></div>
+
+          <div class="fnode fnode-navy">
+            <div class="fnode-label">&#x1F9E0; LLM Selects Tools</div>
+            <div class="fnode-sub">Decides sequence dynamically</div>
+          </div>
+          <div class="arrow-down">
+            <div class="shaft"></div>
+            <div class="arrowlabel">JSON-RPC 2.0</div>
+            <div class="head"></div>
+          </div>
+
+          <div class="server-box">
+            <div class="server-box-title">&#x26A1; MCP Servers</div>
+            <div class="server-types">
+              <div class="stype" style="background:#5B2C6F;">
+                <div class="stype-icon">&#x2699;&#xFE0F;</div>
+                <div class="stype-name">Tools</div>
+                <div class="stype-desc">Execute actions</div>
+              </div>
+              <div class="stype" style="background:#1A5276;">
+                <div class="stype-icon">&#x1F4C4;</div>
+                <div class="stype-name">Resources</div>
+                <div class="stype-desc">Read-only data</div>
+ 
