@@ -1,4 +1,4 @@
-package com.k8sgovernor.util;
+package com.k8sgovernor.gitlab;
 
 import com.k8sgovernor.config.AppConfig;
 
@@ -20,6 +20,9 @@ import org.yaml.snakeyaml.constructor.SafeConstructor;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +30,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GitLabUtils {
+public class GitLabClient {
 
     private final AppConfig appConfig;
 
@@ -39,15 +42,8 @@ public class GitLabUtils {
     private static final Pattern JOB_NAME_PATTERN =
             Pattern.compile("\\{\\{\\s*\\.Values\\.job\\.([\\w]+)\\.name\\s*}}");
 
-    public record GitLabSession(
-            String baseUrl,
-            String projectPath,
-            String branch,
-            String directory,
-            RestClient client,
-            String repositoryTreeUrl,
-            String repositoryRawFileUrl
-    ) {}
+    private static final DateTimeFormatter SUFFIX_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
     @PostConstruct
     void initSession() {
@@ -243,10 +239,16 @@ public class GitLabUtils {
             Object base = resolveValue("job." + jobType + ".name", values);
 
             if (base != null) {
-                String finalName = base + "-" + JobUtils.generateJobNameSuffix();
+                String finalName = base + "-" + generateJobNameSuffix();
                 setNestedValue(values, "job." + jobType + ".name", finalName);
             }
         }
+    }
+
+    private static String generateJobNameSuffix() {
+        String timestamp = ZonedDateTime.now(ZoneOffset.UTC).format(SUFFIX_FORMATTER);
+        String random = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        return timestamp + "-" + random;
     }
 
     private void setNestedValue(Map<String, Object> map, String keyPath, Object value) {

@@ -1,6 +1,5 @@
-package com.k8sgovernor.util;
+package com.k8sgovernor.kubernetes;
 
-import com.k8sgovernor.config.AppConfig;
 import com.k8sgovernor.model.Job;
 
 import io.kubernetes.client.openapi.models.V1Job;
@@ -10,21 +9,12 @@ import io.kubernetes.client.openapi.models.V1ObjectMeta;
 
 import java.time.OffsetDateTime;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
-public class KubernetesUtils {
+public class JobMapper {
 
-    private final AppConfig appConfig;
-
-    public String getNamespace() {
-        return appConfig.getKubernetes().getNamespace();
-    }
-
-    public Job mapV1JobToJob(V1Job v1Job) {
+    public Job toJob(V1Job v1Job) {
         V1ObjectMeta meta = v1Job.getMetadata();
         V1JobStatus jobStatus = v1Job.getStatus();
 
@@ -39,13 +29,13 @@ public class KubernetesUtils {
         return Job.builder()
                 .id(meta != null ? meta.getUid() : null)
                 .name(meta != null ? meta.getName() : null)
-                .status(deriveJobStatus(jobStatus))
+                .status(deriveStatus(jobStatus))
                 .created(created)
                 .completed(completed)
                 .build();
     }
 
-    private String deriveJobStatus(V1JobStatus jobStatus) {
+    private String deriveStatus(V1JobStatus jobStatus) {
         if (jobStatus == null) {
             return "PENDING";
         }

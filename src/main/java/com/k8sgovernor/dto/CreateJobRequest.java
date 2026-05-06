@@ -1,4 +1,4 @@
-package com.k8sgovernor.model;
+package com.k8sgovernor.dto;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class JobCreateRequest {
+public class CreateJobRequest {
     private String templateName;
     private Map<String, Object> overrides;
 }

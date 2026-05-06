@@ -1,8 +1,8 @@
 package com.k8sgovernor.controller;
 
-import com.k8sgovernor.model.Job;
-import com.k8sgovernor.model.JobCreateRequest;
-import com.k8sgovernor.model.JobCreateResponse;
+import com.k8sgovernor.dto.CreateJobRequest;
+import com.k8sgovernor.dto.CreateJobResponse;
+import com.k8sgovernor.dto.JobDto;
 import com.k8sgovernor.service.JobService;
 
 import java.util.List;
@@ -26,16 +26,18 @@ public class JobController {
      * curl http://localhost:9663/governor/jobs
      */
     @GetMapping
-    public ResponseEntity<List<Job>> getAllJobs() {
-        return ResponseEntity.ok(jobService.getAllJobs());
+    public ResponseEntity<List<JobDto>> getAllJobs() {
+        return ResponseEntity.ok(
+                jobService.getAllJobs().stream().map(JobDto::from).toList()
+        );
     }
 
     /**
      * curl http://localhost:9663/governor/jobs/{jobName}
      */
     @GetMapping("/{jobName}")
-    public ResponseEntity<Job> getJobByName(@PathVariable String jobName) {
-        return ResponseEntity.ok(jobService.getJobByName(jobName));
+    public ResponseEntity<JobDto> getJobByName(@PathVariable String jobName) {
+        return ResponseEntity.ok(JobDto.from(jobService.getJobByName(jobName)));
     }
 
     /**
@@ -52,10 +54,10 @@ public class JobController {
      *   -d '{"templateName": "example.yaml"}'
      */
     @PostMapping
-    public ResponseEntity<JobCreateResponse> createJob(@RequestBody JobCreateRequest request) {
+    public ResponseEntity<CreateJobResponse> createJob(@RequestBody CreateJobRequest request) {
         log.info("Create request received for '{}'", request.getTemplateName());
-        String jobName = jobService.createJob(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new JobCreateResponse(jobName));
+        String jobName = jobService.createJob(request.getTemplateName(), request.getOverrides());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CreateJobResponse(jobName));
     }
 
     /**

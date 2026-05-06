@@ -3,10 +3,9 @@ package com.k8sgovernor.service;
 import com.google.gson.Gson;
 
 import com.k8sgovernor.config.AppConfig;
+import com.k8sgovernor.gitlab.GitLabClient;
+import com.k8sgovernor.kubernetes.JobMapper;
 import com.k8sgovernor.model.Job;
-import com.k8sgovernor.model.JobCreateRequest;
-import com.k8sgovernor.util.GitLabUtils;
-import com.k8sgovernor.util.KubernetesUtils;
 
 import io.kubernetes.client.openapi.ApiException;
 import io.kubernetes.client.openapi.JSON;
@@ -37,11 +36,11 @@ public class JobService {
 
     private final BatchV1Api batchV1Api;
     private final AppConfig appConfig;
-    private final GitLabUtils gitLabUtils;
-    private final KubernetesUtils kubernetesUtils;
+    private final GitLabClient gitLabClient;
+    private final JobMapper jobMapper;
 
     public List<Job> getAllJobs() {
-        String namespace = kubernetesUtils.getNamespace();
+        String namespace = appConfig.getKubernetes().getNamespace();
 
         try {
             V1JobList jobList = batchV1Api.listNamespacedJob(
@@ -52,7 +51,7 @@ public class JobService {
 
             List<Job> result = jobList.getItems()
                     .stream()
-                    .map(kubernetesUtils::mapV1JobToJob)
+                    .map(jobMapper::toJob)
                     .collect(Collectors.toList());
 
             log.info("Found {} jobs in namespace '{}'", result.size(), namespace);
@@ -65,11 +64,11 @@ public class JobService {
     }
 
     public Job getJobByName(String jobName) {
-        String namespace = kubernetesUtils.getNamespace();
+        String namespace = appConfig.getKubernetes().getNamespace();
 
         try {
             V1Job v1Job = batchV1Api.readNamespacedJob(jobName, namespace, null, null, null);
-            return kubernetesUtils.mapV1JobToJob(v1Job);
+            return jobMapper.toJob(v1Job);
 
         } catch (ApiException e) {
             if (e.getCode() == 404) {
@@ -82,10 +81,8 @@ public class JobService {
     }
 
     public List<String> getJobTemplateNames() {
-        var helm = appConfig.getKubernetes().getHelm();
-
         try {
-            var context = gitLabUtils.getSession();
+            var context = gitLabClient.getSession();
 
             @SuppressWarnings("unchecked")
             List<Map<String, Object>> items = context.client()
@@ -108,7 +105,7 @@ public class JobService {
             return templates;
 
         } catch (URISyntaxException e) {
-            log.error("Invalid repository URL: {}", helm.getRepository());
+            log.error("Invalid repository URL: {}", appConfig.getKubernetes().getHelm().getRepository());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid repository URL: " + e.getMessage());
 
         } catch (HttpClientErrorException e) {
@@ -117,16 +114,15 @@ public class JobService {
         }
     }
 
-    public String createJob(JobCreateRequest request) {
-        String templateName = request.getTemplateName();
-        String namespace = kubernetesUtils.getNamespace();
+    public String createJob(String templateName, Map<String, Object> overrides) {
+        String namespace = appConfig.getKubernetes().getNamespace();
         String environment = appConfig.getKubernetes().getEnvironment();
         String region = appConfig.getKubernetes().getRegion();
 
         try {
-            String rawYaml = gitLabUtils.fetchTemplate(templateName);
-            Map<String, Object> mergedValues = gitLabUtils.fetchAndMergeValues(environment, region);
-            String renderedTemplate = gitLabUtils.renderTemplate(rawYaml, mergedValues, request.getOverrides());
+            String rawYaml = gitLabClient.fetchTemplate(templateName);
+            Map<String, Object> mergedValues = gitLabClient.fetchAndMergeValues(environment, region);
+            String renderedTemplate = gitLabClient.renderTemplate(rawYaml, mergedValues, overrides);
 
             Yaml yamlParser = new Yaml(new SafeConstructor(new LoaderOptions()));
             @SuppressWarnings("unchecked")
@@ -147,8 +143,7 @@ public class JobService {
         } catch (ApiException e) {
             log.error("Kubernetes error creating job from template '{}': HTTP {} {}",
                     templateName, e.getCode(), e.getResponseBody());
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
-                    "Kubernetes error: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Kubernetes error: " + e.getMessage());
 
         } catch (Exception e) {
             log.error("Failed to parse or render template '{}': {}", templateName, e.getMessage());
@@ -158,7 +153,7 @@ public class JobService {
     }
 
     public boolean deleteJobByName(String jobName) {
-        String namespace = kubernetesUtils.getNamespace();
+        String namespace = appConfig.getKubernetes().getNamespace();
 
         try {
             batchV1Api.deleteNamespacedJob(jobName, namespace, null, null, null, null, "Foreground", null);
