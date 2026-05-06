@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: k8s-governor
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+
+logging:
+  include-application-name: false
+
+server:
+  port: 9663
+  servlet:
+    context-path: /governor/
+
+config:
+  security:
+    apiKey: ${GOVERNOR_API_KEY}
+    apiKeyHeader: ${GOVERNOR_API_KEY_HEADER:X-API-Key}
+  kubernetes:
+    environment: ${APP_ENV}
+    region: ${APP_REGION}
+    namespace: ${K8S_NAMESPACE}
+    service-account: ${K8S_SERVICE_ACCOUNT}
+    connect-timeout-ms: 10000
+    read-timeout-ms: 30000
+    write-timeout-ms: 30000
+    helm:
+      repository: ${HELM_REPO_URL}
+      branch: ${HELM_BRANCH:bau-redhill}
+      directory: ${HELM_DIRECTORY:jobs}
+  gitlab:
+    auth:
+      token: ${GITLAB_ACCESS_TOKEN}
